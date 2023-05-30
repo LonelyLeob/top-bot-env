@@ -1,0 +1,10 @@
+# secret files
+.env
+input
+
+#local cache
+**/__pycache__
+
+# media & static
+data/
+logs/
