@@ -1,14 +1,19 @@
+from typing import Any
 from aiogram.filters.callback_data import CallbackData
-from enum import Enum
 
-class Action(str, Enum):
-    add = "add"
-    list = "list"
-    retrieve = "retrieve"
 
-class DefaultCallback(CallbackData):
+    #agree = 0
+    #decline = 1
+    #apply = 2
+class StartCallback(CallbackData, prefix="request"):
+    user: int
+    action: int
+    #add = "add"
+    #list = "list"
+    #retrieve = "retrieve"
+class DefaultCallback(CallbackData, prefix='default'):
     user: str
-    action: Action
+    action: str
 
 class GroupCallback(DefaultCallback, prefix="group"):
     group: str

@@ -2,7 +2,7 @@
 name = "top-bot"
 version = "1.0"
 description = "This environment inclusive all deps for aiogram bot"
-authors = ["LonelyLeob <l0nelyleob@gmail.com>"]
+authors = ["LonelyLeob <l0nelyleob@gmail.com> & Kejtе"]
 license = "MIT"
 
 [tool.poetry.dependencies]
