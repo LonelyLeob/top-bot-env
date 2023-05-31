@@ -16,9 +16,18 @@ class Subjects():
         return os.listdir(os.path.join(settings.bots.media_store, group))
     
 class Media():
-    def create_media_path(group: str, subject: str, title: str):
-        return os.mkdir(os.path.join(settings.bots.media_store, group, subject, title))
+    def create_media_path(group: str, subject: str, date: str) -> bool:
+        try:
+            os.mkdir(os.path.join(settings.bots.media_store, group, subject, date))
+        except FileExistsError:
+            return True
+        except Exception:
+            return False
+        return True
     
+    def get_media_path(group: str, subject: str, date: str):
+        pass
+
     def list_media_paths(group: str, subject: str):
         return os.listdir(os.path.join(group, subject))
     

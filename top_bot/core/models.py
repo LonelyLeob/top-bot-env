@@ -1,23 +1,25 @@
 class AbstractUser:
-	def __str__(self)->str:
+	role = lambda self: self.__str__()
+	is_superuser = lambda self: False
+	is_manager = lambda self: False
+	is_staff = lambda self: False
+	is_anon = lambda self: False
+
+	def __str__(self)  -> str:
 		return str(__name__).lower()
 
-	def role(self)->str:
-		""""alias for __str__ method"""
-		return self.__str__()
-
-	def is_superuser(self) -> bool:
-		return False
-
 class Manager(AbstractUser):
-	pass
+	is_manager = lambda self: True
+	is_staff = lambda self: True
 
 class Teacher(AbstractUser):
-	pass
+	is_staff = lambda self: True
 
+	
 class Anonymous(AbstractUser):
-	pass
+	is_anon = lambda self: True
 
 class Admin(AbstractUser):
-	def is_superuser(self) -> bool:
-		return True
+	is_superuser = lambda self: True
+	is_manager = lambda self: True
+	is_staff = lambda self: True

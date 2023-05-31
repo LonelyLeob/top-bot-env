@@ -16,7 +16,7 @@ async def load_bot():
     subjects = io_layer.subject.dispatch()
     media = io_layer.media.dispatch()
 
-    io_layer.dispatch_errors([media, subjects, groups, dp])
+    io_layer.base_dispatch([media, subjects, groups, dp])
 
     subjects.include_router(media)
     groups.include_router(subjects)

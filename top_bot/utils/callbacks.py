@@ -10,7 +10,6 @@ class StartCallback(CallbackData, prefix="request"):
     action: int
     #add = "add"
     #list = "list"
-    #retrieve = "retrieve"
 class DefaultCallback(CallbackData, prefix='default'):
     user: str
     action: str
