@@ -14,12 +14,14 @@ class ProduceError(ErrorHandler):
     event: ErrorEvent
     async def handle(self):
         user: User = self.data["event_from_user"]
-        return await self.bot.send_message(settings.bots.admin_id, 
+        await self.bot.send_message(user.id, "Произошла ошибка. Отправляется сообщение системному администратору...")
+        await self.bot.send_message(settings.bots.admin_id, 
                                            "Произошла критическая ошибка. \n"
                                             f"Описание ошибки: {self.event.exception}\n"
                                             f"Вызвана пользователем с ID: {user.id}\n"
                                             f"Полный лог сохранен в: {settings.bots.error_log}"
                                             )
+        return await self.bot.send_message(user.id, "Сообщение доставлено! Скоро починим, попробуйте совершить свои действия с другой группой:)")
 
 class CancellingState(MessageHandler):
     async def handle(self, state: FSMContext):

@@ -2,7 +2,7 @@ from aiogram import BaseMiddleware
 from typing import Any, Awaitable, Callable, Dict
 from aiogram import BaseMiddleware
 import asyncio
-from aiogram.types import Message, TelegramObject
+from aiogram.types import Message
 
 class AlbumMiddleware(BaseMiddleware):
     """This middleware is for capturing media groups."""

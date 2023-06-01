@@ -1,6 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup
-from aiogram.types.inline_keyboard_button import InlineKeyboardButton
-from aiogram.utils.keyboard import InlineKeyboardBuilder, KeyboardBuilder
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from top_bot.utils.callbacks import *
 from top_bot.core.models import AbstractUser
 
@@ -50,16 +49,16 @@ class ManagerInline(DefaultInline):
         return self.markup()
 
     def media(self, user: str, group: str, subject: str):
-        self.button(text='Добавить медиа', callback_data=MediaCallback(user=user, action='add', group=group, subject=subject, path=''))
-        self.button(text='Просмотреть медиа', callback_data=MediaCallback(user=user, action='list_media', group=group, subject=subject, path=''))
+        self.button(text='Добавить медиа', callback_data=MediaCallback(user=user, action='add', group=group, subject=subject, path='', offset=''))
+        self.button(text='Просмотреть медиа', callback_data=MediaCallback(user=user, action='list', group=group, subject=subject, path='', offset=''))
         self.button(text='Назад к дисциплинам', callback_data=GroupCallback(user=user, action='retrieve', group=group))
         self.button(text='Назад к группам', callback_data=GroupCallback(user=user, action='list', group='groups'))
         self.adjust(2,1,1)
         return self.markup()
     
     def result_add_media(self, user: str, group: str, subject: str, offset: str, path: str):
-        self.button(text='Добавить ещё', callback_data=MediaCallback(user=user, action='add', group=group, subject=subject, path=path))
-        self.button(text='Просмотреть медиа', callback_data=MediaCallback(user=user, action='list_media', group=group, subject=subject, path=path, offset=offset))
+        self.button(text='Добавить ещё', callback_data=MediaCallback(user=user, action='add', group=group, subject=subject, path=path, offset=offset))
+        self.button(text='Просмотреть медиа', callback_data=MediaCallback(user=user, action='list', group=group, subject=subject, path=path, offset=offset))
         self.button(text='Назад к дисциплинам', callback_data=GroupCallback(user=user, action='retrieve', group=group))
         self.adjust(2)
         return self.markup()
@@ -74,10 +73,10 @@ class ManagerInline(DefaultInline):
     def list_media_files(self, user: str, group: str, subject: str, offset: str, path: str):
         offsetpl=offset+'+5'
         offsetmn=offset+'-5'
-        self.button(text='Предыдущие', callback_data=MediaCallback(user=user, action='list', group=group, subject=subject, path=path, offset=offsetpl)) 
-        self.button(text='Следующие', callback_data=MediaCallback(user=user, action='list', group=group, subject=subject, path=path, offset=offsetmn)) 
-        self.button(text='Добавить медиа', callback_data=MediaCallback(user=user, action='add', group=group, subject=subject, path=path))
-        self.button(text='Назад к дисциплинам', callback_data=GroupCallback(user=user, action='list', group=group))
+        self.button(text='Предыдущие', callback_data=MediaCallback(user=user, action='retrieve', group=group, subject=subject, path=path, offset=offsetmn)) 
+        self.button(text='Следующие', callback_data=MediaCallback(user=user, action='retrieve', group=group, subject=subject, path=path, offset=offsetpl)) 
+        self.button(text='Добавить медиа', callback_data=MediaCallback(user=user, action='add', group=group, subject=subject, path=path, offset=''))
+        self.button(text='Назад к дисциплинам', callback_data=GroupCallback(user=user, action='retrieve', group=group))
         self.adjust(2,1,1)
         return self.markup()
 

@@ -1,9 +1,24 @@
 import asyncio
+import os
 from aiogram import Bot
 import top_bot.core.io as io_layer
 from top_bot.core.settings import settings
+from top_bot.utils.commands import set_commands
 
 async def on_startup(bot: Bot):
+    await set_commands(bot)
+
+    try:
+        os.mkdir(settings.bots.media_store)
+    except FileExistsError:
+        pass
+
+    try:
+        open(settings.bots.users_list, "x")
+    except FileExistsError:
+        pass
+    
+    await bot.send_message(settings.bots.admin_id, text='Бот запущен!')
     await bot.send_message(settings.bots.admin_id, "Бот включен")
 
 async def on_shutdown(bot: Bot):

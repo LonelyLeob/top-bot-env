@@ -17,7 +17,7 @@ def dispatch() -> Dispatcher:
 class Start(MessageHandler):
     async def handle(self):
         if self.from_user.id == settings.bots.manager_id:
-            return await self.event.answer("Привет админ", reply_markup=ManagerInline().start(str(self.from_user.id)))
+            return await self.event.answer("Привет", reply_markup=ManagerInline().start(str(self.from_user.id)))
         elif self.from_user.id == "":
             return await self.event.answer("Привет препод", reply_markup=TeacherInline().start(str(self.from_user.id)))
         return await self.event.answer(

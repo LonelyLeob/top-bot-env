@@ -1,3 +1,4 @@
+from typing import Any
 from aiogram.handlers import MessageHandler, CallbackQueryHandler
 from aiogram import Router, F, Bot
 from top_bot.core.io import base
@@ -33,38 +34,39 @@ class RetrieveSubject(CallbackQueryHandler):
                                     'Выберите действие:',
                                     reply_markup=ManagerInline().media(user=cb.user, group=cb.group, subject=cb.subject))
     
+class CreateSubjects(CallbackQueryHandler):
+    async def handle(self):
+            state: FSMContext = self.data["state"]
+            cb = SubjectCallback.unpack(self.callback_data)
+            await self.bot.send_message(self.from_user.id, 
+                                'Введите название дисциплины, если их несколько то вводите через Enter\n'
+                                'Пример:\n'
+                                'PythonJun\n'
+                                'PythonMid\n'
+                                'И т.д.')
+            await state.update_data(user=cb.user, group=cb.group)
+            return await state.set_state(AddSubjectState.GET_NAME)
 
-async def CreateSubjects(cb: CallbackQuery, bot: Bot, state: FSMContext):
-        cb_data = SubjectCallback.unpack(cb.data)
-        await bot.send_message(cb.from_user.id, 
-                               'Введите название дисциплины, если их несколько то вводите через Enter\n'
-                               'Пример:\n'
-                               'PythonJun\n'
-                               'PythonMid\n'
-                               'И т.д.')
-        await state.update_data(user=cb_data.user, group=cb_data.group)
-        return await state.set_state(AddSubjectState.GET_NAME)
 
-
-async def SetSubjectName(message: Message, bot: Bot, state: FSMContext):
-    context = await state.get_data()
-    subjects = message.text.split('\n')
-    k = 0
-    for subject in subjects:
-        try:
-            Subjects.create_subject(context['group'], subject)
-        except Exception:
-            k += 1
-    if k == len(subjects):
-        await bot.send_message(message.from_user.id, 'Данные дисциплины уже существуют, введите название ещё раз или веберите действие',
-                               reply_markup=ManagerInline().add_subject_result(user=context['user'], group=context['group'], subject='subjects'))
+class SetSubjectName(MessageHandler):
+    async def handle(self):
+        state: FSMContext = self.data["state"]
+        context = await state.get_data()
+        subjects = self.event.text.split('\n')
+        k = 0
+        for subject in subjects:
+            if not (Subjects.create_subject(context['group'], subject)):
+                k += 1
+        if k == len(subjects):
+            await self.bot.send_message(self.from_user.id, 'Данные дисциплины уже существуют, введите название ещё раз или веберите действие',
+                                reply_markup=ManagerInline().add_subject_result(user=context['user'], group=context['group'], subject='subjects'))
+            
+        elif k == 0 and (len(subjects) == 1 or len(subjects) >= 1):
+            await self.bot.send_message(self.from_user.id, 'Добавление дисциплины прошло успешно',
+                                reply_markup=ManagerInline().add_subject_result(user=context['user'], group=context['group'], subject='subjects'))
         
-    elif k == 0 and (len(subjects) == 1 or len(subjects) >= 1):
-        await bot.send_message(message.from_user.id, 'Добавление дисциплины прошло успешно',
-                               reply_markup=ManagerInline().add_subject_result(user=context['user'], group=context['group'], subject='subjects'))
-    
-    else:
-        await bot.send_message(message.from_user.id, f'{str(k)} из перечислинных дисциплин уже существует, остальные были созданы успешно',
-                               reply_markup=ManagerInline().add_subject_result(user=context['user'], group=context['group'], subject='subjects'))
-        
+        else:
+            await self.bot.send_message(self.from_user.id, f'{str(k)} из перечислинных дисциплин уже существует, остальные были созданы успешно',
+                                reply_markup=ManagerInline().add_subject_result(user=context['user'], group=context['group'], subject='subjects'))
+            
     
