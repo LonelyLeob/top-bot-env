@@ -10,7 +10,7 @@ class AddMediaState(StatesGroup):
     GET_MEDIA = State()
     GET_RESULT = State()
     
-class ListMedia(StatesGroup):
+class ListMediaFiles(StatesGroup):
     CHOICE_ACTION = State()
     ADD_MEDIA = State()
 

@@ -22,3 +22,5 @@ class SubjectCallback(GroupCallback, prefix="subject"):
 
 class MediaCallback(SubjectCallback, prefix="media"):
     action: str
+    #offset: str
+    path: str

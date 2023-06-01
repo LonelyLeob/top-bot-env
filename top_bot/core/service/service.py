@@ -25,11 +25,31 @@ class Media():
             return False
         return True
     
-    def get_media_path(group: str, subject: str, date: str):
-        pass
+    def save_media_path(group: str, subject: str, filename: str, date: str):
+        return os.path.join(settings.bots.media_store, group, subject, date, filename)
 
     def list_media_paths(group: str, subject: str):
-        return os.listdir(os.path.join(group, subject))
+        return os.listdir(os.path.join(settings.bots.media_store ,group, subject))
     
-    def list_media_files(group: str, subject: str, title: str):
-        return os.listdir(os.path.join(group, subject, title))
+    def list_media_files(group: str, subject: str, date: str):
+        return os.listdir(os.path.join(settings.bots.media_store,group, subject, date))
+    
+    def get_media_path(group: str, subject: str, date: str):
+        return os.path.join(settings.bots.media_store, group, subject, date)
+    
+    def get_media_file(group: str, subject: str, date: str, file: str):
+        return os.path.join(settings.bots.media_store, group, subject, date, file)
+    
+    def offset_generator(offset: str):
+        if '+' in offset:
+            offset = offset.split('+')
+            offset = int(offset[0]) + int(offset[1])
+            sign = '+'
+            return int(offset), sign
+        elif '-' in offset:
+            offset = offset.split('-')
+            offset = int(offset[0]) - int(offset[1])
+            sign = '-'
+            return int(offset), sign
+        else:
+            return '0', '+'

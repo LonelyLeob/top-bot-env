@@ -50,24 +50,33 @@ class ManagerInline(DefaultInline):
         return self.markup()
 
     def media(self, user: str, group: str, subject: str):
-        self.button(text='Добавить медиа', callback_data=MediaCallback(user=user, action='add', group=group, subject=subject))
-        self.button(text='Просмотреть медиа', callback_data=MediaCallback(user=user, action='retrieve', group=group, subject=subject))
+        self.button(text='Добавить медиа', callback_data=MediaCallback(user=user, action='add', group=group, subject=subject, path=''))
+        self.button(text='Просмотреть медиа', callback_data=MediaCallback(user=user, action='list_media', group=group, subject=subject, path=''))
         self.button(text='Назад к дисциплинам', callback_data=GroupCallback(user=user, action='retrieve', group=group))
         self.button(text='Назад к группам', callback_data=GroupCallback(user=user, action='list', group='groups'))
         self.adjust(2,1,1)
         return self.markup()
     
-    def result_add_media(self, user: str, group: str, subject: str):
-        self.button(text='Добавить ещё', callback_data=MediaCallback(user=user, action='add', group=group, subject=subject))
-        self.button(text='Просмотреть медиа', callback_data=MediaCallback(user=user, action='list', group=group, subject=subject))
+    def result_add_media(self, user: str, group: str, subject: str, offset: str, path: str):
+        self.button(text='Добавить ещё', callback_data=MediaCallback(user=user, action='add', group=group, subject=subject, path=path))
+        self.button(text='Просмотреть медиа', callback_data=MediaCallback(user=user, action='list_media', group=group, subject=subject, path=path, offset=offset))
         self.button(text='Назад к дисциплинам', callback_data=GroupCallback(user=user, action='retrieve', group=group))
         self.adjust(2)
         return self.markup()
+    
+    def list_media_paths(self, user: str, group: str, subject: str, media_paths: list[str], offset: str):
+        for path in media_paths:
+            self.button(text=f'{path}', callback_data=MediaCallback(user=user, subject=subject, action='retrieve', group=group, path=path, offset='0'))
+        self.button(text='Назад к медиа', callback_data=SubjectCallback(user=user, action='retrieve', group=group, subject=subject))
+        self.adjust(1)
+        return self.markup()
 
-    def list_media(self, user: str, group: str, subject: str):
-        self.button(text='Предыдущие', callback_data='') #???
-        self.button(text='Следующие', callback_data='') #???
-        self.button(text='Добавить медиа', callback_data='') #???
+    def list_media_files(self, user: str, group: str, subject: str, offset: str, path: str):
+        offsetpl=offset+'+5'
+        offsetmn=offset+'-5'
+        self.button(text='Предыдущие', callback_data=MediaCallback(user=user, action='list', group=group, subject=subject, path=path, offset=offsetpl)) 
+        self.button(text='Следующие', callback_data=MediaCallback(user=user, action='list', group=group, subject=subject, path=path, offset=offsetmn)) 
+        self.button(text='Добавить медиа', callback_data=MediaCallback(user=user, action='add', group=group, subject=subject, path=path))
         self.button(text='Назад к дисциплинам', callback_data=GroupCallback(user=user, action='list', group=group))
         self.adjust(2,1,1)
         return self.markup()
