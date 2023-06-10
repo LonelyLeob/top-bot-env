@@ -4,10 +4,10 @@ from aiogram import Router, F, Bot
 from top_bot.core.io import base
 from top_bot.utils.callbacks import SubjectCallback, GroupCallback
 from top_bot.utils.keyboards import *
-from top_bot.core.service import Subjects
-from aiogram.types import CallbackQuery, Message
+from top_bot.core.service import Subjects, Auth
 from aiogram.fsm.context import FSMContext
 from top_bot.utils.states import *
+from top_bot.core.settings import settings
 
 def dispatch() -> Router:
     subjects = Router(name="subjects")
@@ -19,23 +19,36 @@ def dispatch() -> Router:
 
 class ListSubjects(CallbackQueryHandler):
     async def handle(self):
+        await self.message.delete()
         cb = GroupCallback.unpack(self.callback_data)
         subjects = Subjects.list_subjects(cb.group)
-        await self.bot.send_message(self.from_user.id, 
-                                    f'Вы выбрали группу: {cb.group}\n'
-                                    'Список дисциплин:',
-                                    reply_markup=ManagerInline().subjects(user=cb.user, group=cb.group, subjects=subjects))
+        user_id = int(self.from_user.id)
+        if Auth.is_manager(user_id):
+            return await self.bot.send_message(chat_id=user_id, 
+                                            text=f'Вы выбрали группу: {cb.group}\n'
+                                            'Список дисциплин:',
+                                            reply_markup=ManagerInline().subjects(group=cb.group, subjects=subjects))
+        elif Auth.is_teacher(str(user_id)):
+            return await self.bot.send_message(chat_id=user_id,
+                                                text=f"Вы выбрали группу: {cb.group}\n"
+                                                'Cписок дисциплин:', 
+                                                reply_markup=TeacherInline().subjects(group=cb.group, subjects=subjects))
+        return await self.bot.send_message(chat_id=user_id,
+                                               text='Вы не прошли авторизацию, пожалуйста подайте заявку', 
+                                                reply_markup=StartInline().start(user=self.from_user.id))
     
 class RetrieveSubject(CallbackQueryHandler):
     async def handle(self):
+        await self.message.delete()
         cb = SubjectCallback.unpack(self.callback_data)
         await self.bot.send_message(self.from_user.id,
                                     f'Вы выбрали дисциплину: {cb.subject}\n'
                                     'Выберите действие:',
-                                    reply_markup=ManagerInline().media(user=cb.user, group=cb.group, subject=cb.subject))
+                                    reply_markup=ManagerInline().media(group=cb.group, subject=cb.subject))
     
 class CreateSubjects(CallbackQueryHandler):
     async def handle(self):
+            await self.message.delete()
             state: FSMContext = self.data["state"]
             cb = SubjectCallback.unpack(self.callback_data)
             await self.bot.send_message(self.from_user.id, 
@@ -44,7 +57,7 @@ class CreateSubjects(CallbackQueryHandler):
                                 'PythonJun\n'
                                 'PythonMid\n'
                                 'И т.д.')
-            await state.update_data(user=cb.user, group=cb.group)
+            await state.update_data(group=cb.group)
             return await state.set_state(AddSubjectState.GET_NAME)
 
 
@@ -59,14 +72,14 @@ class SetSubjectName(MessageHandler):
                 k += 1
         if k == len(subjects):
             await self.bot.send_message(self.from_user.id, 'Данные дисциплины уже существуют, введите название ещё раз или веберите действие',
-                                reply_markup=ManagerInline().add_subject_result(user=context['user'], group=context['group'], subject='subjects'))
+                                reply_markup=ManagerInline().add_subject_result(group=context['group'], subject='subjects'))
             
         elif k == 0 and (len(subjects) == 1 or len(subjects) >= 1):
             await self.bot.send_message(self.from_user.id, 'Добавление дисциплины прошло успешно',
-                                reply_markup=ManagerInline().add_subject_result(user=context['user'], group=context['group'], subject='subjects'))
+                                reply_markup=ManagerInline().add_subject_result(group=context['group'], subject='subjects'))
         
         else:
             await self.bot.send_message(self.from_user.id, f'{str(k)} из перечислинных дисциплин уже существует, остальные были созданы успешно',
-                                reply_markup=ManagerInline().add_subject_result(user=context['user'], group=context['group'], subject='subjects'))
+                                reply_markup=ManagerInline().add_subject_result(group=context['group'], subject='subjects'))
             
     

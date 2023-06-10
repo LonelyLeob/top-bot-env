@@ -9,92 +9,93 @@ class DefaultInline(InlineKeyboardBuilder):
         return self.as_markup()
 
 class StartInline(DefaultInline):
-    def start(self, user_id: int):
-            self.button(text="Подать заявку", callback_data=StartCallback(action=2, user=user_id))
+    def start(self, user: int):
+            self.button(text="Подать заявку", callback_data=StartCallback(action=2, user=user,))
             self.adjust(1)
             return self.markup()
     
 class ManagerInline(DefaultInline):
-    def apply(self, user_id: int):
-        self.button(text="Подтвердить", callback_data=StartCallback(action=0, user=user_id))
-        self.button(text="Отклонить", callback_data=StartCallback(action=1, user=user_id))
+    def apply(self, user: int):
+        self.button(text="Подтвердить", callback_data=StartCallback(action=0, user=user,))
+        self.button(text="Отклонить", callback_data=StartCallback(action=1, user=user,))
         return self.markup()
     
-    def start(self, user: str):
-        self.button(text='Создать группу', callback_data=GroupCallback(user=user, action='add', group='group'))
-        self.button(text='Все группы', callback_data=GroupCallback(user=user, action='list', group='groups'))
+    def start(self):
+        print()
+        self.button(text='Создать группу', callback_data=GroupCallback(action='add', group='group'))
+        self.button(text='Все группы', callback_data=GroupCallback(action='list', group='groups'))
         self.adjust(1)
         return self.markup()
 
-    def groups(self, user: str, groups: list[str]):
+    def groups(self, groups: list[str]):
         for group in groups:
-            self.button(text=f'{group}', callback_data=GroupCallback(user=user, action='retrieve', group=group))
-        self.button(text='Добавить группу', callback_data=GroupCallback(user=user, action='add', group='group'))
+            self.button(text=f'{group}', callback_data=GroupCallback(action='retrieve', group=group))
+        self.button(text='Добавить группу', callback_data=GroupCallback(action='add', group='group'))
         self.adjust(1)
         return self.markup()
 
-    def subjects(self, user: str, group: str, subjects: list[str]):
+    def subjects(self, group: str, subjects: list[str]):
         for subject in subjects:
-            self.button(text=f'{subject}', callback_data=SubjectCallback(user=user, action='retrieve', group=group, subject=subject))
-        self.button(text='Добавить дисциплину', callback_data=SubjectCallback(user=user, action='add', group=group, subject=subject))
-        self.button(text='Назад к группам', callback_data=GroupCallback(user=user, action='list', group='groups'))
+            self.button(text=f'{subject}', callback_data=SubjectCallback(action='retrieve', group=group, subject=subject))
+        self.button(text='Добавить дисциплину', callback_data=SubjectCallback(action='add', group=group, subject=subject))
+        self.button(text='Назад к группам', callback_data=GroupCallback(action='list', group='groups'))
         self.adjust(1)
         return self.markup()
     
-    def add_subject_result(self, user: str, group: str, subject: str):
-        self.button(text='Продолжить добавление', callback_data=SubjectCallback(user=user, action='add', group=group, subject=subject))
-        self.button(text='Просмотреть дисциплины', callback_data=GroupCallback(user=user, action='retrieve', group=group))
-        self.button(text='Назад к группам', callback_data=GroupCallback(user=user, action='list', group='groups'))
+    def add_subject_result(self, group: str, subject: str):
+        self.button(text='Продолжить добавление', callback_data=SubjectCallback(action='add', group=group, subject=subject))
+        self.button(text='Просмотреть дисциплины', callback_data=GroupCallback(action='retrieve', group=group))
+        self.button(text='Назад к группам', callback_data=GroupCallback(action='list', group='groups'))
         self.adjust(2)
         return self.markup()
 
-    def media(self, user: str, group: str, subject: str):
-        self.button(text='Добавить медиа', callback_data=MediaCallback(user=user, action='add', group=group, subject=subject, path='', offset=''))
-        self.button(text='Просмотреть медиа', callback_data=MediaCallback(user=user, action='list', group=group, subject=subject, path='', offset=''))
-        self.button(text='Назад к дисциплинам', callback_data=GroupCallback(user=user, action='retrieve', group=group))
-        self.button(text='Назад к группам', callback_data=GroupCallback(user=user, action='list', group='groups'))
+    def media(self, group: str, subject: str):
+        self.button(text='Добавить медиа', callback_data=MediaCallback(action='add', group=group, subject=subject, path='', offset=''))
+        self.button(text='Просмотреть медиа', callback_data=MediaCallback(action='list', group=group, subject=subject, path='', offset=''))
+        self.button(text='Назад к дисциплинам', callback_data=GroupCallback(action='retrieve', group=group))
+        self.button(text='Назад к группам', callback_data=GroupCallback(action='list', group='groups'))
         self.adjust(2,1,1)
         return self.markup()
     
-    def result_add_media(self, user: str, group: str, subject: str, offset: str, path: str):
-        self.button(text='Добавить ещё', callback_data=MediaCallback(user=user, action='add', group=group, subject=subject, path=path, offset=offset))
-        self.button(text='Просмотреть медиа', callback_data=MediaCallback(user=user, action='list', group=group, subject=subject, path=path, offset=offset))
-        self.button(text='Назад к дисциплинам', callback_data=GroupCallback(user=user, action='retrieve', group=group))
+    def result_add_media(self, group: str, subject: str, offset: str, path: str):
+        self.button(text='Добавить ещё', callback_data=MediaCallback(action='add', group=group, subject=subject, path=path, offset=offset))
+        self.button(text='Просмотреть медиа', callback_data=MediaCallback(action='list', group=group, subject=subject, path=path, offset=offset))
+        self.button(text='Назад к дисциплинам', callback_data=GroupCallback(action='retrieve', group=group))
         self.adjust(2)
         return self.markup()
     
-    def list_media_paths(self, user: str, group: str, subject: str, media_paths: list[str], offset: str):
+    def list_media_paths(self, group: str, subject: str, media_paths: list[str], offset: str):
         for path in media_paths:
-            self.button(text=f'{path}', callback_data=MediaCallback(user=user, subject=subject, action='retrieve', group=group, path=path, offset='0'))
-        self.button(text='Назад к медиа', callback_data=SubjectCallback(user=user, action='retrieve', group=group, subject=subject))
+            self.button(text=f'{path}', callback_data=MediaCallback(subject=subject, action='retrieve', group=group, path=path, offset='0'))
+        self.button(text='Назад к медиа', callback_data=SubjectCallback(action='retrieve', group=group, subject=subject))
         self.adjust(1)
         return self.markup()
 
-    def list_media_files(self, user: str, group: str, subject: str, offset: str, path: str):
+    def list_media_files(self, group: str, subject: str, offset: str, path: str):
         offsetpl=offset+'+5'
         offsetmn=offset+'-5'
-        self.button(text='Предыдущие', callback_data=MediaCallback(user=user, action='retrieve', group=group, subject=subject, path=path, offset=offsetmn)) 
-        self.button(text='Следующие', callback_data=MediaCallback(user=user, action='retrieve', group=group, subject=subject, path=path, offset=offsetpl)) 
-        self.button(text='Добавить медиа', callback_data=MediaCallback(user=user, action='add', group=group, subject=subject, path=path, offset=''))
-        self.button(text='Назад к дисциплинам', callback_data=GroupCallback(user=user, action='retrieve', group=group))
+        self.button(text='Предыдущие', callback_data=MediaCallback(action='retrieve', group=group, subject=subject, path=path, offset=offsetmn)) 
+        self.button(text='Следующие', callback_data=MediaCallback(action='retrieve', group=group, subject=subject, path=path, offset=offsetpl)) 
+        self.button(text='Добавить медиа', callback_data=MediaCallback(action='add', group=group, subject=subject, path=path, offset=''))
+        self.button(text='Назад к дисциплинам', callback_data=GroupCallback(action='retrieve', group=group))
         self.adjust(2,1,1)
         return self.markup()
 
 class TeacherInline(DefaultInline):
-    def start(self, user:str):
-        self.button(text="Все группы", callback_data=GroupCallback(user=user, action="list", group=""))
+    def start(self):
+        self.button(text="Все группы", callback_data=GroupCallback(action="list", group=""))
         return self.markup()
 
-    def groups(self, user: str, groups: list[str]):
+    def groups(self, groups: list[str]):
         for group in groups:
-            self.button(text=f'{group}', callback_data=GroupCallback(user=user, action='retrieve', group=group))
+            self.button(text=f'{group}', callback_data=GroupCallback(action='retrieve', group=group))
         self.adjust(1)
-        return self.as_markup()
-
-    def subjects(self, user: str, group: str, subjects: list[str]):
+        return self.markup()
+    
+    def subjects(self, group: str, subjects: list[str]):
         for subject in subjects:
-            self.button(text=f'{subject}', callback_data=SubjectCallback(user=user, action='retrieve', group=group, subject=subject))
-        self.button(text='Назад к группам', callback_data='') #???
+            self.button(text=f'{subject}', callback_data=SubjectCallback(action='retrieve', group=group, subject=subject))
+        self.button(text='Назад к группам', callback_data=GroupCallback(action='list', group='groups'))
         self.adjust(1)
         return self.as_markup()
 

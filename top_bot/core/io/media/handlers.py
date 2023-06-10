@@ -20,25 +20,27 @@ def dispatch():
 
 class ListMedia(CallbackQueryHandler):
     async def handle(self):
+        await self.message.delete()
         cb = MediaCallback.unpack(self.callback_data)
         media_paths = Media.list_media_paths(cb.group, cb.subject)
         return await self.bot.send_message(self.from_user.id, 'Дата указана в формате: ГГ.ММ.ДД\n'
                            'Выберите дату сохранения:',
-                            reply_markup=ManagerInline().list_media_paths(group=cb.group, subject=cb.subject, media_paths=media_paths, user=cb.user, offset=0))
+                            reply_markup=ManagerInline().list_media_paths(group=cb.group, subject=cb.subject, media_paths=media_paths, offset=0))
 
     
 class SetMedia(CallbackQueryHandler):
     async def handle(self):
+        await self.message.delete()
         cb = MediaCallback.unpack(self.callback_data)
         date = dt.now().strftime("%d.%m.%Y")
         state: FSMContext = self.data["state"]
         if cb.path != "":
             date = cb.path
-            await state.update_data(group=cb.group, subject=cb.subject, date=date, user=cb.user)
+            await state.update_data(group=cb.group, subject=cb.subject, date=date)
             await self.message.answer('Папка уже была создана ранее. Отправьте медиа файл')
             return await state.set_state(AddMediaState.GET_MEDIA)
         elif Media.create_media_path(cb.group, cb.subject, date):
-            await state.update_data(group=cb.group, subject=cb.subject, date=date, user=cb.user)
+            await state.update_data(group=cb.group, subject=cb.subject, date=date)
             await self.message.answer('Папка на текущую дату создана. Отправьте медиа файл')
             return await state.set_state(AddMediaState.GET_MEDIA)
         return await self.message.answer("Произошла ошибка, обратитесь к системному администратору!")
@@ -60,13 +62,13 @@ class AddAlbum(MessageHandler):
             path = Media.save_media_path(group=context['group'], subject=context['subject'], filename=pathname[1], date=context["date"] if 'date' in context.keys() else dt.now().strftime("%d.%m.%Y"))
             await self.bot.download_file(file.file_path, path)
         return await self.bot.send_message(self.from_user.id, f'Ваш файл успешно сохранен в директорию', 
-                                            reply_markup=ManagerInline().result_add_media(group=context["group"], subject=context["subject"], user=context["user"], offset='0', path=dt.now().strftime("%d.%m.%Y")))
+                                            reply_markup=ManagerInline().result_add_media(group=context["group"], subject=context["subject"], offset='0', path=context["date"] if 'date' in context.keys() else dt.now().strftime("%d.%m.%Y")))
 
 class SendMedia(CallbackQueryHandler):
     async def handle(self):
+        await self.message.delete()
         state: FSMContext = self.data["state"]
         cb = MediaCallback.unpack(self.callback_data)
-        user = cb.user
         date = cb.path
         group = cb.group
         subject = cb.subject
@@ -80,7 +82,7 @@ class SendMedia(CallbackQueryHandler):
             await self.bot.send_message(self.from_user.id, 
                                 'На данную дату не сохранено ни одного медиа файла.\n'
                                 'Выберите действие',
-                                reply_markup=ManagerInline().list_media_files(group=group, subject=subject, offset=str(offset), user=user, path=date))
+                                reply_markup=ManagerInline().list_media_files(group=group, subject=subject, offset=str(offset), path=date))
         elif int(offset) < 0:
             await self.bot.send_message(self.from_user.id, 'Вам отправлены первые фото')
             offset = 0
@@ -101,6 +103,6 @@ class SendMedia(CallbackQueryHandler):
                     media.append(file)
             await self.bot.send_media_group(self.from_user.id, media)
             await self.bot.send_message(self.from_user.id, 'Выберите действие:',
-                                reply_markup=ManagerInline().list_media_files(group=group, subject=subject, offset=str(offset), user=user, path=date))
-            await state.update_data(path=path, group=group, subject=subject, me=user)
+                                reply_markup=ManagerInline().list_media_files(group=group, subject=subject, offset=str(offset), path=date))
+            await state.update_data(path=path, group=group, subject=subject)
             await state.set_state(ListMediaFiles.CHOICE_ACTION)

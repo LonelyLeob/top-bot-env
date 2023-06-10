@@ -1,6 +1,27 @@
 from top_bot.core.settings import settings
 import os
 
+class Auth:
+    def is_teacher(user_id: int) -> bool:
+        with open(settings.bots.users_list, 'r') as users_list:   
+            for user in users_list:
+                        if str(user_id) in str(user):
+                            return True
+            return False
+        
+    def is_manager(user_id: int) -> bool:
+        if user_id == settings.bots.manager_id:
+            return True
+        return False
+    
+    def create_user(user_id: str) -> bool:
+        try:
+            with open(settings.bots.users_list, 'a') as user_list:
+                    user_list.write(user_id +',')
+                    return True
+        except Exception:
+            return False
+
 class Groups:
     def create_group(title: str):
         return os.mkdir(os.path.join(settings.bots.media_store, title))

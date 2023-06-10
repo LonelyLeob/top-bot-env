@@ -6,12 +6,11 @@ from aiogram.filters.callback_data import CallbackData
     #decline = 1
     #apply = 2
 class StartCallback(CallbackData, prefix="request"):
-    user: int
     action: int
+    user: str
     #add = "add"
     #list = "list"
 class DefaultCallback(CallbackData, prefix='default'):
-    user: str
     action: str
 
 class GroupCallback(DefaultCallback, prefix="group"):

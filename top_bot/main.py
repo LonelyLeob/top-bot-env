@@ -17,9 +17,8 @@ async def on_startup(bot: Bot):
         open(settings.bots.users_list, "x")
     except FileExistsError:
         pass
-    
+
     await bot.send_message(settings.bots.admin_id, text='Бот запущен!')
-    await bot.send_message(settings.bots.admin_id, "Бот включен")
 
 async def on_shutdown(bot: Bot):
     await bot.send_message(settings.bots.admin_id, "Бот отключен")
