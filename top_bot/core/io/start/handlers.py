@@ -10,7 +10,7 @@ from top_bot.core.io.start.middleware import AuthMiddleware
 
 def dispatch() -> Dispatcher:
     dp = Dispatcher(name="main")
-    dp.message.middleware.register(AuthMiddleware())
+    #dp.message.middleware.register(AuthMiddleware())
     dp.message.register(Start, Command(commands="start"))
     dp.callback_query.register(Apply, StartCallback.filter(F.action == 2))
     dp.callback_query.register(ProduceApply, StartCallback.filter(F.action.in_({0, 1})))
