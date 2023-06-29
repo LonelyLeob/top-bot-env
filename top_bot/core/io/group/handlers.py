@@ -35,23 +35,27 @@ class CreateGroup(CallbackQueryHandler):
     async def handle(self):
                     self.message.delete()
                     state: FSMContext = self.data["state"]
-                    cb = GroupCallback.unpack(cb.data)
                     await self.bot.send_message(self.from_user.id, 'Введите название группы!')
                 
                     return await state.set_state(AddGroupState.GET_TITLE)
         
 class SetGroupTitle(MessageHandler):
     async def handle(self):
+                    list_groups = Groups.list_groups()
                     state: FSMContext = self.data["state"]
                     title = self.event.text
-                    await self.send_message(self.from_user.id, 
-                                            'Введите название дисциплин разделяя их через Enter.\n'
-                                            'Пример:\n'
-                                            'PythonJun\n'
-                                            'PythonMid\n'
-                                            'И так далее')
-                    await state.update_data(title=title)
-                    return await state.set_state(AddGroupState.GET_SUBJECTS)
+                    if title in list_groups:
+                        await state.clear()
+                        return await self.bot.send_message(self.from_user.id, 'Группа с таким названием уже существует! Выеберите действие:', reply_markup=ManagerInline().start())
+                    else:
+                        await self.bot.send_message(self.from_user.id, 
+                                                'Введите название дисциплин разделяя их через Enter.\n'
+                                                'Пример:\n'
+                                                'PythonJun\n'
+                                                'PythonMid\n'
+                                                'И так далее')
+                        await state.update_data(title=title)
+                        return await state.set_state(AddGroupState.GET_SUBJECTS)
 
 class SetSubjects(MessageHandler):
     async def handle(self):
@@ -72,14 +76,17 @@ class ResultCreateGroup(MessageHandler):
     async def handle(self):
             state: FSMContext = self.data["state"]
             context =  await state.get_data()
-            if 'да' in self.event.text.lower():
+            if 'Да' in self.event.text.lower():
                 Groups.create_group(title=context['title'])
                 subjects = context['subjects'].split('\n')
                 for subject in subjects:
                     Subjects.create_subject(group=context['title'], title=subject)
+                await state.clear()
                 return await self.bot.send_message(self.from_user.id, 'Создание группы прошло успешно!\n'
-                                                'Выберите действие над группой', reply_markup=ManagerInline().subjects(group=context['title'],subjects=subjects))
+                                                    'Выберите действие над группой', reply_markup=ManagerInline().subjects(group=context['title'],subjects=subjects))
+                
             else:
+                await state.clear()
                 return await self.bot.send_message(self.from_user.id, 
                                                 'Отменяю создание группы\n'
                                                 'Выберите действие:',

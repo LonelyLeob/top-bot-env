@@ -37,7 +37,8 @@ class SetMedia(CallbackQueryHandler):
         if cb.path != "":
             date = cb.path
             await state.update_data(group=cb.group, subject=cb.subject, date=date)
-            await self.message.answer('Папка уже была создана ранее. Отправьте медиа файл')
+            await self.message.answer(f'Файл будет сохранён на данную дату: {date}.\n' 
+                                      'Отправьте медиа файл')
             return await state.set_state(AddMediaState.GET_MEDIA)
         elif Media.create_media_path(cb.group, cb.subject, date):
             await state.update_data(group=cb.group, subject=cb.subject, date=date)
@@ -66,7 +67,6 @@ class AddAlbum(MessageHandler):
 
 class SendMedia(CallbackQueryHandler):
     async def handle(self):
-        await self.message.delete()
         state: FSMContext = self.data["state"]
         cb = MediaCallback.unpack(self.callback_data)
         date = cb.path

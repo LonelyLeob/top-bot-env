@@ -20,9 +20,9 @@ def dispatch() -> Dispatcher:
 class Start(MessageHandler):
     async def handle(self):       
         if self.from_user.id == settings.bots.manager_id:
-            return await self.event.answer("Привет", reply_markup=ManagerInline().start())
+            return await self.event.answer("Здравствуй менеджер", reply_markup=ManagerInline().start())
         elif Auth.is_teacher(str(self.from_user.id)):
-            return await self.event.answer('Привет препод', reply_markup=TeacherInline().start())
+            return await self.event.answer('Здравствуй преподаватель', reply_markup=TeacherInline().start())
         return await self.event.answer(
             "Привет! Я бот для Top Academy. \n"
             "Я создан для того, чтобы сохранять фотографии и другие материалы, которые сделали студенты. \n"

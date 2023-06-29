@@ -23,8 +23,13 @@ class Auth:
             return False
 
 class Groups:
-    def create_group(title: str):
-        return os.mkdir(os.path.join(settings.bots.media_store, title))
+    def create_group(title: str) -> bool:
+        try:
+             os.mkdir(os.path.join(settings.bots.media_store, title))
+             return True
+        except Exception:
+            return False
+    
 
     def list_groups():
         return os.listdir(settings.bots.media_store)
