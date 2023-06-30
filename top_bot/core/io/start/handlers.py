@@ -7,6 +7,7 @@ from top_bot.utils.keyboards import *
 from top_bot.utils.callbacks import *
 from top_bot.core.settings import settings
 from top_bot.core.io.start.middleware import AuthMiddleware
+from aiogram.fsm.context import FSMContext
 
 def dispatch() -> Dispatcher:
     dp = Dispatcher(name="main")
@@ -19,19 +20,22 @@ def dispatch() -> Dispatcher:
 
 class Start(MessageHandler):
     async def handle(self):       
+        state: FSMContext = self.data["state"]
         if self.from_user.id == settings.bots.manager_id:
             return await self.event.answer("Здравствуй менеджер", reply_markup=ManagerInline().start())
         elif Auth.is_teacher(str(self.from_user.id)):
             return await self.event.answer('Здравствуй преподаватель', reply_markup=TeacherInline().start())
-        return await self.event.answer(
-            "Привет! Я бот для Top Academy. \n"
-            "Я создан для того, чтобы сохранять фотографии и другие материалы, которые сделали студенты. \n"
-            "Подайте заявку для верификации вашим МУП:)",
-                                            reply_markup=StartInline().start(user=self.from_user.id))
-        
+        else:
+            return await self.event.answer(
+                "Привет! Я бот для Top Academy. \n"
+                "Я создан для того, чтобы сохранять фотографии и другие материалы, которые сделали студенты. \n"
+                "Подайте заявку для верификации вашим МУП:)",
+                                                reply_markup=StartInline().start(user=self.from_user.id))
+    
 class Apply(CallbackQueryHandler):
     async def handle(self):
         await self.message.delete()
+        await self.bot.send_message(self.from_user.id, 'Вы подали заявку, её обработка может занять некоторое время')
         return await self.bot.send_message(settings.bots.manager_id, f"Пользователь c никнеймом {self.from_user.full_name} отправил запрос, продолжить?", 
                                            reply_markup=ManagerInline().apply(user=self.from_user.id))
     

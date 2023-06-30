@@ -33,14 +33,28 @@ class ManagerInline(DefaultInline):
         self.button(text='Добавить группу', callback_data=GroupCallback(action='add', group='group'))
         self.adjust(1)
         return self.markup()
+    
+    def confirmation_destroy_group(self, group: str):
+        self.button(text='Да', callback_data=GroupCallback(action='confirm_destroy', group=group))
+        self.button(text='Нет', callback_data=GroupCallback(action='retrieve', group=group))
+        self.adjust(2)
+        return self.markup()
 
     def subjects(self, group: str, subjects: list[str]):
         for subject in subjects:
             self.button(text=f'{subject}', callback_data=SubjectCallback(action='retrieve', group=group, subject=subject))
         self.button(text='Добавить дисциплину', callback_data=SubjectCallback(action='add', group=group, subject=subject))
+        self.button(text='Удалить группу', callback_data=GroupCallback(action='destroy', group=group))
         self.button(text='Назад к группам', callback_data=GroupCallback(action='list', group='groups'))
         self.adjust(1)
         return self.markup()
+    
+    def confirmation_destroy_group(self, group: str):
+        self.button(text='Да', callback_data=GroupCallback(action='confirm_destroy', group=group))
+        self.button(text='Нет', callback_data=GroupCallback(action='retrieve', group=group))
+        self.adjust(2)
+        return self.markup()
+
     
     def add_subject_result(self, group: str, subject: str):
         self.button(text='Продолжить добавление', callback_data=SubjectCallback(action='add', group=group, subject=subject))
@@ -49,12 +63,19 @@ class ManagerInline(DefaultInline):
         self.adjust(2)
         return self.markup()
 
+    def confirmation_destroy_subject(self, group: str, subject: str):
+        self.button(text='Да', callback_data=SubjectCallback(action='confirm_destroy', group=group, subject=subject))
+        self.button(text='Нет', callback_data=SubjectCallback(action='retrieve', group=group, subject=subject))
+        self.adjust(2)
+        return self.markup()
+
     def media(self, group: str, subject: str):
         self.button(text='Добавить медиа', callback_data=MediaCallback(action='add', group=group, subject=subject, path='', offset=''))
         self.button(text='Просмотреть медиа', callback_data=MediaCallback(action='list', group=group, subject=subject, path='', offset=''))
         self.button(text='Назад к дисциплинам', callback_data=GroupCallback(action='retrieve', group=group))
+        self.button(text='Удалить дисциплину', callback_data=SubjectCallback(action='destroy', group=group, subject=subject))
         self.button(text='Назад к группам', callback_data=GroupCallback(action='list', group='groups'))
-        self.adjust(2,1,1)
+        self.adjust(2,1,1,1)
         return self.markup()
     
     def result_add_media(self, group: str, subject: str, offset: str, path: str):
@@ -106,12 +127,12 @@ class StaffInline(InlineKeyboardBuilder):
     def start(self, user: AbstractUser):
         self.button(text="Отправить тикет", )
         if user.is_staff():
-            self.button(text="Все группы", callback_data=GroupCallback(user=user.role(), action="list", group=""))
+            self.button(text="Все группы", callback_data=GroupCallback( action="list", group=""))
         if user.is_manager() or user.is_superuser():
-            self.button(text="Добавить группу", callback_data=GroupCallback(user=user.role(), action="add", group=""))
+            self.button(text="Добавить группу", callback_data=GroupCallback(action="add", group=""))
 
     def groups(self, user: str, groups: list[str]):
         for group in groups:
-            self.button(text=f'{group}', callback_data=GroupCallback(user=user, action='retrieve', group=group))
+            self.button(text=f'{group}', callback_data=GroupCallback(action='retrieve', group=group))
         self.adjust(1)
         return self.as_markup()

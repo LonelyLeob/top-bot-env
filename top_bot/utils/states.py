@@ -16,3 +16,4 @@ class ListMediaFiles(StatesGroup):
 
 class AddSubjectState(StatesGroup):
     GET_NAME = State()
+

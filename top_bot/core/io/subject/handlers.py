@@ -14,6 +14,8 @@ def dispatch() -> Router:
     subjects.callback_query.register(ListSubjects, GroupCallback.filter(F.action=='retrieve'))
     subjects.callback_query.register(RetrieveSubject, SubjectCallback.filter(F.action=='retrieve'))
     subjects.callback_query.register(CreateSubjects, SubjectCallback.filter(F.action=='add'))
+    subjects.callback_query.register(ConfirmationDestroySubject, SubjectCallback.filter(F.action=='destroy'))
+    subjects.callback_query.register(DestroySubject, SubjectCallback.filter(F.action=='confirm_destroy'))
     subjects.message.register(SetSubjectName, AddSubjectState.GET_NAME)
     return subjects
 
@@ -81,5 +83,26 @@ class SetSubjectName(MessageHandler):
         else:
             await self.bot.send_message(self.from_user.id, f'{str(k)} из перечислинных дисциплин уже существует, остальные были созданы успешно',
                                 reply_markup=ManagerInline().add_subject_result(group=context['group'], subject='subjects'))
-            
+
+class ConfirmationDestroySubject(CallbackQueryHandler):
+      async def handle(self):
+            self.message.delete()
+            cb = SubjectCallback.unpack(self.callback_data)
+            return await self.bot.send_message(self.from_user.id,f'Вы уверенны, что хотите удалить дисциплину {cb.subject}?',
+                                               reply_markup=ManagerInline().confirmation_destroy_subject(group=cb.group, subject=cb.subject))
+
+class DestroySubject(CallbackQueryHandler):
+      async def handle(self):
+            self.message.delete()
+            cb = SubjectCallback.unpack(self.callback_data)
+            if Subjects.destroy_subject(group=cb.group,subject=cb.subject):
+                subjects = Subjects.list_subjects(cb.group)
+                return await self.bot.send_message(self.from_user.id, 'Удаление дисциплины прошло успешно, список существующих дисциплин:',
+                                                reply_markup=ManagerInline().subjects(group=cb.group, subjects=subjects))
+            else:
+                subjects = Subjects.list_subjects(cb.group)
+                return await self.bot.send_message(self.from_user.id, 
+                                                   'При удалении дисциплины произошла непредвиденная ошибка, обратитесь к ситстемному администратору\n'
+                                                   'Вы можете прейти к работе с другой дисциплиной',
+                                                   reply_markup=ManagerInline().subjects(group=cb.group, subjects=subjects))
     

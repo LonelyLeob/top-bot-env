@@ -12,6 +12,8 @@ def dispatch() -> Router:
     groups = Router(name="groups")
     groups.callback_query.register(ListGroups, GroupCallback.filter(F.action=="list"))
     groups.callback_query.register(CreateGroup, GroupCallback.filter(F.action=="add"))
+    groups.callback_query.register(ConfirmationDestroyGroup, GroupCallback.filter(F.action=='destroy'))
+    groups.callback_query.register(DestroyGroup, GroupCallback.filter(F.action=='confirm_destroy'))
     groups.message.register(SetGroupTitle, AddGroupState.GET_TITLE)
     groups.message.register(SetSubjects, AddGroupState.GET_SUBJECTS)
     groups.message.register(ResultCreateGroup, AddGroupState.GET_RESULT)
@@ -76,7 +78,7 @@ class ResultCreateGroup(MessageHandler):
     async def handle(self):
             state: FSMContext = self.data["state"]
             context =  await state.get_data()
-            if 'Да' in self.event.text.lower():
+            if 'да' in self.event.text.lower():
                 Groups.create_group(title=context['title'])
                 subjects = context['subjects'].split('\n')
                 for subject in subjects:
@@ -91,3 +93,25 @@ class ResultCreateGroup(MessageHandler):
                                                 'Отменяю создание группы\n'
                                                 'Выберите действие:',
                                                 reply_markup=ManagerInline().start())
+            
+class ConfirmationDestroyGroup(CallbackQueryHandler):
+      async def handle(self):
+            self.message.delete()
+            cb = GroupCallback.unpack(self.callback_data)
+            return await self.bot.send_message(self.from_user.id,f'Вы уверенны, что хотите удалить группу {cb.group}?',
+                                               reply_markup=ManagerInline().confirmation_destroy_group(group=cb.group))
+
+class DestroyGroup(CallbackQueryHandler):
+      async def handle(self):
+            self.message.delete()
+            cb = GroupCallback.unpack(self.callback_data)
+            if Groups.destroy_group(cb.group):
+                groups = Groups.list_groups()
+                return await self.bot.send_message(self.from_user.id, 'Удаление группы прошло успешно, список существующих групп:',
+                                                reply_markup=ManagerInline().groups(groups=groups))
+            else:
+                groups = Groups.list_groups()
+                return await self.bot.send_message(self.from_user.id, 
+                                                   'При удалении группы произошла непредвиденная ошибка, обратитесь к ситстемному администратору\n'
+                                                   'Вы можете прейти к работе с другой группой',
+                                                   reply_markup=ManagerInline().groups(groups=groups))

@@ -1,4 +1,5 @@
 from top_bot.core.settings import settings
+from shutil import rmtree
 import os
 
 class Auth:
@@ -33,6 +34,15 @@ class Groups:
 
     def list_groups():
         return os.listdir(settings.bots.media_store)
+    
+    def destroy_group(group: str) -> bool:
+        group_path = os.path.join(settings.bots.media_store, group)
+        try:
+            rmtree(group_path)
+            return True
+        except Exception:
+            return False
+        
 
 class Subjects:
     def create_subject(group: str, title: str) -> bool:
@@ -42,6 +52,13 @@ class Subjects:
         except Exception:
             return False
 
+    def destroy_subject(group: str, subject: str) -> bool:
+        subject_path = os.path.join(settings.bots.media_store, group, subject)
+        try:
+            rmtree(subject_path)
+            return True
+        except Exception:
+            return False
 
     def list_subjects(group: str):
         return os.listdir(os.path.join(settings.bots.media_store, group))
