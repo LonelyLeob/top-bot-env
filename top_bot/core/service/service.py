@@ -42,6 +42,12 @@ class Groups:
             return True
         except Exception:
             return False
+    
+    def validation_group(group: str) -> bool:
+        group = os.listdir(os.path.join(settings.bots.media_store, group))
+        if len(group) == 0:
+            return False
+        return True
         
 
 class Subjects:
@@ -51,6 +57,13 @@ class Subjects:
             return True
         except Exception:
             return False
+        
+    def validation_subjects(subjects: list[str]) -> bool:
+        for subject in subjects:
+            if subjects.count(subject) > 1:
+                return False
+                
+        return True
 
     def destroy_subject(group: str, subject: str) -> bool:
         subject_path = os.path.join(settings.bots.media_store, group, subject)
@@ -61,7 +74,8 @@ class Subjects:
             return False
 
     def list_subjects(group: str):
-        return os.listdir(os.path.join(settings.bots.media_store, group))
+        path = os.path.join(settings.bots.media_store, group)
+        return os.listdir(path=path)
     
 class Media():
     def create_media_path(group: str, subject: str, date: str) -> bool:

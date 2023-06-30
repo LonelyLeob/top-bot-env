@@ -78,6 +78,13 @@ class ManagerInline(DefaultInline):
         self.adjust(2,1,1,1)
         return self.markup()
     
+    def for_empty_group(self, group: str):
+        self.button(text='Добавить дисциплину', callback_data=SubjectCallback(action='add', group=group, subject=''))
+        self.button(text='Удалить группу', callback_data=GroupCallback(action='destroy', group=group))
+        self.button(text='Назад к группам', callback_data=GroupCallback(action='list', group='groups'))
+        self.adjust(1)
+        return self.markup()
+
     def result_add_media(self, group: str, subject: str, offset: str, path: str):
         self.button(text='Добавить ещё', callback_data=MediaCallback(action='add', group=group, subject=subject, path=path, offset=offset))
         self.button(text='Просмотреть медиа', callback_data=MediaCallback(action='list', group=group, subject=subject, path=path, offset=offset))

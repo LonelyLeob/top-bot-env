@@ -64,15 +64,19 @@ class SetSubjects(MessageHandler):
             state: FSMContext = self.data["state"]
             await state.update_data(subjects=self.event.text)
             context = await state.get_data()
-            await self.bot.send_message(self.from_user.id,
-                "Если данные указаны верно отправьте сообщение: Да\n"
-                "Если вы допустили ошибку то отправьте сообщение: Нет\n"
-                "Данные новой группы:\n"
-                f"Название: {context['title']}\n"
-                "Дисциплины:\n"
-                f"{context['subjects']}"
-                )
-            return await state.set_state(AddGroupState.GET_RESULT) 
+            if Subjects.validation_subjects(subjects=self.event.text.split('\n')):
+                await self.bot.send_message(self.from_user.id,
+                    "Если данные указаны верно отправьте сообщение: Да\n"
+                    "Если вы допустили ошибку то отправьте сообщение: Нет\n"
+                    "Данные новой группы:\n"
+                    f"Название: {context['title']}\n"
+                    "Дисциплины:\n"
+                    f"{context['subjects']}"
+                    )
+                return await state.set_state(AddGroupState.GET_RESULT) 
+            else:
+                return await self.bot.send_message(self.from_user.id, 'В перечисленных дисциплинах найдены дубликаты, пожалуйста перечислите дисциплины снова')
+                
 
 class ResultCreateGroup(MessageHandler):
     async def handle(self):
