@@ -120,8 +120,13 @@ class TeacherInline(DefaultInline):
         self.adjust(1)
         return self.as_markup()
 
-    def media():
-        pass
+    def media(self, group: str, subject: str):
+        self.button(text='Добавить медиа', callback_data=MediaCallback(action='add', group=group, subject=subject, path='', offset=''))
+        self.button(text='Просмотреть медиа', callback_data=MediaCallback(action='list', group=group, subject=subject, path='', offset=''))
+        self.button(text='Назад к дисциплинам', callback_data=GroupCallback(action='retrieve', group=group))
+        self.button(text='Назад к группам', callback_data=GroupCallback(action='list', group='groups'))
+        self.adjust(2,1,1)
+        return self.markup()
 
 class StaffInline(InlineKeyboardBuilder):
     def start(self, user: AbstractUser):

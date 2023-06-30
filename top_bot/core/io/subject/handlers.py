@@ -43,10 +43,16 @@ class RetrieveSubject(CallbackQueryHandler):
     async def handle(self):
         await self.message.delete()
         cb = SubjectCallback.unpack(self.callback_data)
-        await self.bot.send_message(self.from_user.id,
-                                    f'Вы выбрали дисциплину: {cb.subject}\n'
-                                    'Выберите действие:',
-                                    reply_markup=ManagerInline().media(group=cb.group, subject=cb.subject))
+        if Auth.is_manager(self.from_user.id):
+            return await self.bot.send_message(self.from_user.id,
+                                        f'Вы выбрали дисциплину: {cb.subject}\n'
+                                        'Выберите действие:',
+                                        reply_markup=ManagerInline().media(group=cb.group, subject=cb.subject))
+        else:
+             return await self.bot.send_message(self.from_user.id,
+                                        f'Вы выбрали дисциплину: {cb.subject}\n'
+                                        'Выберите действие:',
+                                        reply_markup=TeacherInline().media(group=cb.group, subject=cb.subject))
     
 class CreateSubjects(CallbackQueryHandler):
     async def handle(self):
