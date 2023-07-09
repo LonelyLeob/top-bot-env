@@ -92,6 +92,11 @@ class ManagerInline(DefaultInline):
         self.adjust(2)
         return self.markup()
     
+    def cancel_save_media(self, group: str):
+        self.button(text='Отменить отправку', callback_data=GroupCallback(action='retrieve', group=group))
+        self.adjust(1)
+        return self.markup()
+    
     def list_media_paths(self, group: str, subject: str, media_paths: list[str], offset: str):
         for path in media_paths:
             self.button(text=f'{path}', callback_data=MediaCallback(subject=subject, action='retrieve', group=group, path=path, offset='0'))

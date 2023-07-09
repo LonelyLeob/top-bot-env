@@ -38,11 +38,11 @@ class SetMedia(CallbackQueryHandler):
             date = cb.path
             await state.update_data(group=cb.group, subject=cb.subject, date=date)
             await self.message.answer(f'Файл будет сохранён на данную дату: {date}.\n' 
-                                      'Отправьте медиа файл')
+                                      'Отправьте медиа файл', reply_markup=ManagerInline().cancel_save_media(group=cb.group))
             return await state.set_state(AddMediaState.GET_MEDIA)
         elif Media.create_media_path(cb.group, cb.subject, date):
             await state.update_data(group=cb.group, subject=cb.subject, date=date)
-            await self.message.answer('Папка на текущую дату создана. Отправьте медиа файл')
+            await self.message.answer('Папка на текущую дату создана. Отправьте медиа файл', reply_markup=ManagerInline().cancel_save_media(group=cb.group))
             return await state.set_state(AddMediaState.GET_MEDIA)
         return await self.message.answer("Произошла ошибка, обратитесь к системному администратору!")
 
@@ -51,19 +51,22 @@ class AddAlbum(MessageHandler):
         state: FSMContext = self.data["state"]
         album: list[Message] = self.data["album"]
         context = await state.get_data()
-        for msg in album:
-            if msg.photo:
-                file_id = msg.photo[-1].file_id
-            elif msg.video:
-                file_id = msg.video.file_id
-            elif msg.document:
-                file_id = msg.document.file_id
-            file = await self.bot.get_file(file_id)
-            pathname = file.file_path.split("/")
-            path = Media.save_media_path(group=context['group'], subject=context['subject'], filename=pathname[1], date=context["date"] if 'date' in context.keys() else dt.now().strftime("%d.%m.%Y"))
-            await self.bot.download_file(file.file_path, path)
-        return await self.bot.send_message(self.from_user.id, f'Ваш файл успешно сохранен в директорию', 
-                                            reply_markup=ManagerInline().result_add_media(group=context["group"], subject=context["subject"], offset='0', path=context["date"] if 'date' in context.keys() else dt.now().strftime("%d.%m.%Y")))
+        if self.event.text:
+            await self.bot.send_message(self.from_user.id, f'Вы отправили текстовое сообщение, а не медиа файл')
+        else:
+            for msg in album:
+                if msg.photo:
+                    file_id = msg.photo[-1].file_id
+                elif msg.video:
+                    file_id = msg.video.file_id
+                elif msg.document:
+                    file_id = msg.document.file_id
+                file = await self.bot.get_file(file_id)
+                pathname = file.file_path.split("/")
+                path = Media.save_media_path(group=context['group'], subject=context['subject'], filename=pathname[1], date=context["date"] if 'date' in context.keys() else dt.now().strftime("%d.%m.%Y"))
+                await self.bot.download_file(file.file_path, path)
+            return await self.bot.send_message(self.from_user.id, f'Ваш файл успешно сохранен в директорию', 
+                                                reply_markup=ManagerInline().result_add_media(group=context["group"], subject=context["subject"], offset='0', path=context["date"] if 'date' in context.keys() else dt.now().strftime("%d.%m.%Y")))
 
 class SendMedia(CallbackQueryHandler):
     async def handle(self):
