@@ -9,6 +9,7 @@ async def on_startup(bot: Bot):
     await set_commands(bot)
 
     try:
+        os.mkdir(settings.bots.root_dir)
         os.mkdir(settings.bots.media_store)
     except FileExistsError:
         pass

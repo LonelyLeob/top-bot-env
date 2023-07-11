@@ -12,7 +12,7 @@ class Bots:
     manager_id: int
     users_list: str
     error_log: str
-
+    root_dir: str
 
 
 @dataclass
@@ -29,6 +29,7 @@ def get_settings(path: str):
         bots=Bots(
             bot_token=env.str('TOKEN'),
             admin_id=env.int('ADMIN_ID'),
+            root_dir=os.path.join(Path(__file__).parent.parent, "data"),
             media_store=os.path.join(Path(__file__).parent.parent, "data", env.str("MEDIA_STORE")),
             manager_id=env.int("MANAGER_ID"),
             users_list=os.path.join(Path(__file__).parent.parent, "data", env.str("USERS_LIST")),
